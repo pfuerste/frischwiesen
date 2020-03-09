@@ -141,6 +141,34 @@ abline(model_all_K, col = "black", lwd=2)
 #min(data.all$K)
 #max(data.all$K)
 
+####################################################
+# Korrelationskoeffizienten der einfachen Variablen 
+#################################################### 
+cor_saale_N <- cor(data.Saaletal$biom, data.Saaletal$N)
+cor_ilm_N <- cor(data.Ilmtal$biom, data.Ilmtal$N)
+cor_all_N <- cor(data.all$biom, data.all$N)
+
+cor_saale_Corg <- cor(data.Saaletal$biom, data.Saaletal$Corg)
+cor_ilm_Corg <- cor(data.Ilmtal$biom, data.Ilmtal$Corg)
+cor_all_Corg <- cor(data.all$biom, data.all$Corg)
+
+cor_saale_Artenzahl <- cor(data.Saaletal$biom, data.Saaletal$Artenzahl)
+cor_ilm_Artenzahl <- cor(data.Ilmtal$biom, data.Ilmtal$Artenzahl)
+cor_all_Artenzahl <- cor(data.all$biom, data.all$Artenzahl)
+
+cor_saale_pH <- cor(data.Saaletal$biom, data.Saaletal$pH)
+cor_ilm_pH <- cor(data.Ilmtal$biom, data.Ilmtal$pH)
+cor_all_pH <- cor(data.all$biom, data.all$pH)
+
+cor_saale_K <- cor(data.Saaletal$biom, data.Saaletal$K)
+cor_ilm_K <- cor(data.Ilmtal$biom, data.Ilmtal$K)
+cor_all_K <- cor(data.all$biom, data.all$K)
+
+cor_saale_Corg <- cor(data.Saaletal$biom, data.Saaletal$Corg)
+cor_ilm_Corg <- cor(data.Ilmtal$biom, data.Ilmtal$Corg)
+cor_all_Corg <- cor(data.all$biom, data.all$Corg)
+
+
 ###################################################
 # Model Selection basierend auf Beobachtungen
 ###################################################
