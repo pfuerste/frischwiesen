@@ -29,7 +29,7 @@ model_ilm_Corg.N <- lm(biom~1+Corg.N, data = data.Ilmtal) # biomasse ~ Kohlensto
 
 
 # biomasse ~ Stickstoff
-plot(biom~N, data = data.Ilmtal, col = "red", pch=16) 
+plot(biom~N, data = data.Ilmtal, col = "red", pch=16)
 abline(model_ilm_N, col = "red")
 
 # biomasse ~Kohlenstoff
@@ -164,15 +164,44 @@ cor_saale_K <- cor(data.Saaletal$biom, data.Saaletal$K)
 cor_ilm_K <- cor(data.Ilmtal$biom, data.Ilmtal$K)
 cor_all_K <- cor(data.all$biom, data.all$K)
 
-cor_saale_Corg <- cor(data.Saaletal$biom, data.Saaletal$Corg)
-cor_ilm_Corg <- cor(data.Ilmtal$biom, data.Ilmtal$Corg)
-cor_all_Corg <- cor(data.all$biom, data.all$Corg)
+cor_saale_P <- cor(data.Saaletal$biom, data.Saaletal$P)
+cor_ilm_P <- cor(data.Ilmtal$biom, data.Ilmtal$P)
+cor_all_P <- cor(data.all$biom, data.all$P)
+
+cor_saale_Cges <- cor(data.Saaletal$biom, data.Saaletal$Cges)
+cor_ilm_Cges <- cor(data.Ilmtal$biom, data.Ilmtal$Cges)
+cor_all_Cges <- cor(data.all$biom, data.all$Cges)
+
+cor_saale_Corg.N <- cor(data.Saaletal$biom, data.Saaletal$Corg.N)
+cor_ilm_Corg.N <- cor(data.Ilmtal$biom, data.Ilmtal$Corg.N)
+cor_all_Corg.N <- cor(data.all$biom, data.all$Corg.N)
 
 
 ###################################################
-# Model Selection basierend auf Beobachtungen
+# Model Selection basierend auf Mallows Cp
+# Maximales Modell für Gebiete erstellen:
 ###################################################
-model_ILM <- lm(biom~1+N+Corg+Artenzahl)
+
+# Ilmtal (Alle Variablen über Threshold von 0.3 einbezogen)
+max_Ilm <- lm(biom~1+N+Corg+Cges+(Corg.N)+pH, data = data.Ilmtal)
+
+# Best Model mit Mallows Cp
+require("leaps")
+Cp_Ilm <- regsubsets(biom~1+N+Corg+Cges+(Corg.N)+pH, data = data.Ilmtal, nbest = 3)
+summary(Cp_Ilm)$cp
+summary(Cp_Ilm)$which[4,]
+lm1 <- lm(biom~1+Cges+(Corg.N), data = data.Ilmtal)
+
+#SPSE berechnen
+length = dim(data.Ilmtal)[1]      #data entries
+RSS <- sum(residuals(max_Ilm)^2)  # residual sum squared of maximal model
+sigma2.max <- RSS/(length-6)      # max.Modell / (#entries - #Parameters of maximal model)
+
+SPSE1 <- RSS + 2*sigma2.max*2
+# Compute expected SPSE for the 5 best models (based on mallow's Cp)
+summary(Cp_Ilm)$cp[c(2,3,4)]*sigma2.max + length * sigma2.max
+
+# Saaletal
 
 
 ####################################################
