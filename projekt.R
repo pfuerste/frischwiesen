@@ -12,7 +12,7 @@ data.Saaletal <- data.all[data.all$Gebiet == "Saaletal", ]
 # Prognose der Biomasseproduktion her.
 ####################################################
 
-# Visualisieren der Variablen im Verhältnis:
+# Visualisieren der Variablen im Verh?ltnis:
 plot(data.all)
 # Jede Variable gegeneinander Plotten,
 # vielversprechende Kombinationen selektieren.
@@ -25,6 +25,8 @@ model_ilm_Corg <- lm(biom~1+Corg, data = data.Ilmtal) # biomasse ~Kohlenstoff
 model_ilm_Artenzahl <- lm(biom~1+Artenzahl, data = data.Ilmtal) # biomasse ~ Artenzahl
 model_ilm_pH <- lm(biom~1+pH, data = data.Ilmtal) # biomasse ~ pH
 model_ilm_K <- lm(biom~1+K, data = data.Ilmtal) # biomasse ~ Kalium
+model_ilm_Corg.N <- lm(biom~1+Corg.N, data = data.Ilmtal) # biomasse ~ Kohlenstoff/Stickstoff
+
 
 # biomasse ~ Stickstoff
 plot(biom~N, data = data.Ilmtal, col = "red", pch=16) 
@@ -46,6 +48,10 @@ abline(model_ilm_pH, col = "red")
 plot(biom~K, data = data.Ilmtal, col = "red", pch=16)
 abline(model_ilm_K, col = "red")
 
+# biomasse ~ Corg.N
+plot(biom~Corg.N, data = data.Ilmtal, col = "red", pch=16)
+abline(model_ilm_Corg.N, col = "red")
+
 
 ################
 ### Saaletal ###
@@ -55,6 +61,7 @@ model_saale_Corg <- lm(biom~1+Corg, data = data.Saaletal) # biomasse ~Kohlenstof
 model_saale_Artenzahl <- lm(biom~1+Artenzahl, data = data.Saaletal) # biomasse ~ Artenzahl
 model_saale_pH <- lm(biom~1+pH, data = data.Saaletal) # biomasse ~ pH
 model_saale_K <- lm(biom~1+K, data = data.Saaletal) # biomasse ~ Kalium
+model_ilm_Corg.N <- lm(biom~1+Corg.N, data = data.Saaletal) # biomasse ~ Kohlenstoff/Stickstoff
 
 # biomasse ~ Stickstoff
 plot(biom~N, data = data.Saaletal, col = "darkgreen", pch=16)
@@ -75,6 +82,11 @@ abline(model_saale_pH, col = "darkgreen")
 # biomasse ~ Kalium
 plot(biom~K, data = data.Saaletal, col = "darkgreen", pch=16)
 abline(model_saale_K, col = "darkgreen")
+
+# biomasse ~ Corg.N
+plot(biom~Corg.N, data = data.Saaletal, col = "darkgreen", pch=16)
+abline(model_saale_Corg.N, col = "darkgreen")
+
 
 #########################
 ### Kombinierte Plots ###
@@ -129,13 +141,17 @@ abline(model_all_K, col = "black", lwd=2)
 #min(data.all$K)
 #max(data.all$K)
 
+###################################################
+# Model Selection basierend auf Beobachtungen
+###################################################
+model_ILM <- lm(biom~1+N+Corg+Artenzahl)
 
 
 ####################################################
 # 2. Analysieren Sie dann beide Teildatensa??tze gemeinsam
 # und untersuchen Sie insbesondere das Vorliegen von 
 # Wechselwirkungen, d.h. unterschiedliche quantitative 
-# Effekte der Einflussgro??ßen in den beiden Untersuchungsgebieten.
+# Effekte der Einflussgro???en in den beiden Untersuchungsgebieten.
 ####################################################
 
 
