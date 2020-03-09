@@ -61,7 +61,7 @@ model_saale_Corg <- lm(biom~1+Corg, data = data.Saaletal) # biomasse ~Kohlenstof
 model_saale_Artenzahl <- lm(biom~1+Artenzahl, data = data.Saaletal) # biomasse ~ Artenzahl
 model_saale_pH <- lm(biom~1+pH, data = data.Saaletal) # biomasse ~ pH
 model_saale_K <- lm(biom~1+K, data = data.Saaletal) # biomasse ~ Kalium
-model_ilm_Corg.N <- lm(biom~1+Corg.N, data = data.Saaletal) # biomasse ~ Kohlenstoff/Stickstoff
+model_saale_Corg.N <- lm(biom~1+Corg.N, data = data.Saaletal) # biomasse ~ Kohlenstoff/Stickstoff
 
 # biomasse ~ Stickstoff
 plot(biom~N, data = data.Saaletal, col = "darkgreen", pch=16)
