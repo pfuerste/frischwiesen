@@ -182,24 +182,37 @@ cor_all_Corg.N <- cor(data.all$biom, data.all$Corg.N)
 # Maximales Modell für Gebiete erstellen:
 ###################################################
 
-# Ilmtal (Alle Variablen über Threshold von 0.3 einbezogen)
-max_Ilm <- lm(biom~1+N+Corg+Cges+(Corg.N)+pH, data = data.Ilmtal)
+### Ilmtal (Alle Variablen über Threshold von 0.3 einbezogen)
+own_model_Ilm <- lm(biom~1+N+Corg+Cges+(Corg.N)+pH, data = data.Ilmtal)
 
 # Best Model mit Mallows Cp
 require("leaps")
-Cp_Ilm <- regsubsets(biom~1+N+Corg+Cges+(Corg.N)+pH, data = data.Ilmtal, nbest = 3)
-summary(Cp_Ilm)$cp
-summary(Cp_Ilm)$which[4,]
-lm1 <- lm(biom~1+Cges+(Corg.N), data = data.Ilmtal)
+ilm_bss <- regsubsets(biom~1+N+Corg+Cges+(Corg.N)+pH+Artenzahl+P+K, data = data.Ilmtal, nbest = 3)
+summary(ilm_bss)$cp
+index <- which.min(summary(ilm_bss)$cp)
+summary(ilm_bss)$which[index,]
+Cp_Ilm <- lm(biom~1+Cges+(Corg.N), data = data.Ilmtal)
+
+
+### Saaletal (Alle Variablen über Threshold von 0.3 einbezogen)
+own_model_Saale <- lm(biom~1+Artenzahl+N+Corg+Cges+(Corg.N)+P+pH, data = data.Saaletal)
+
+# Best Model mit Mallows Cp
+saale_bss <- regsubsets(biom~1+N+Corg+Cges+(Corg.N)+pH+Artenzahl+P+K, data = data.Saaletal, nbest = 3)
+summary(saale_bss)$cp
+index <- which.min(summary(saale_bss)$cp)
+summary(saale_bss)$which[index,]
+Cp_Saale <- lm(biom~1+Corg+Cges+Corg.N+pH+P+K, data = data.Saaletal)
+
 
 #SPSE berechnen
-length = dim(data.Ilmtal)[1]      #data entries
-RSS <- sum(residuals(max_Ilm)^2)  # residual sum squared of maximal model
-sigma2.max <- RSS/(length-6)      # max.Modell / (#entries - #Parameters of maximal model)
+length = dim(data.Ilmtal)[1]            #data entries
+RSS <- sum(residuals(own_model_Ilm)^2)  # residual sum squared of maximal model
+sigma2.max <- RSS/(length-length(coef(own_model_Ilm)))  # max.Modell / (#entries - #Parameters of maximal model)
 
-SPSE1 <- RSS + 2*sigma2.max*2
+SPSE1 <- RSS + 2*sigma2.max*length(coef(own_model_Ilm))
 # Compute expected SPSE for the 5 best models (based on mallow's Cp)
-summary(Cp_Ilm)$cp[c(2,3,4)]*sigma2.max + length * sigma2.max
+summary(ilm_bss)$cp[c(2,3,4)]*sigma2.max + length * sigma2.max
 
 # Saaletal
 
