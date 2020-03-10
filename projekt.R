@@ -197,6 +197,11 @@ Cp_Ilm <- lm(biom~1+Cges+(Corg.N), data = data.Ilmtal)
 ### Saaletal (Alle Variablen Ã¼ber Threshold von 0.3 einbezogen)
 own_model_Saale <- lm(biom~1+Artenzahl+N+Corg+Cges+(Corg.N)+P+pH, data = data.Saaletal)
 
+
+####################################################
+# 3. Vergleichen sie die Genauigkeit der Vorhersage für Biomasse für das Saaletal basierend auf dem separaten und dem gemeinsamem Modell.
+# Verwenden sie hierbei auf geeignete Art den SPSE.
+####################################################
 # Best Model mit Mallows Cp
 saale_bss <- regsubsets(biom~1+N+Corg+Cges+(Corg.N)+pH+Artenzahl+P+K, data = data.Saaletal, nbest = 3)
 summary(saale_bss)$cp
@@ -209,21 +214,24 @@ all_bss <- regsubsets(biom~as.factor(Gebiet)+(N+Corg+Cges+(Corg.N)+pH+Artenzahl+
 summary(all_bss)$cp
 index <- which.min(summary(all_bss)$cp)
 summary(all_bss)$which[index,]
-Cp_all <- lm(biom~1+Corg+Cges+Corg.N+pH+P+K, data = data.all)
+Cp_all <- lm(biom~1+N+Corg+Cges+Corg.N+as.factor(Gebiet):Corg+as.factor(Gebiet):pH, data = data.all)
+
+max_modell <- lm(biom~(N+Corg+Cges+(Corg.N)+pH+Artenzahl+P+K), data = data.Saaletal)
+max_RSS <- sum((data.Saaletal$biom - predict(max_modell, newdata = data.Saaletal))^2)
+length = dim(data.all)[1]            # data entries
+sigma2.max <- max_RSS/length  # max.Modell / #entries
+
+# SPSE fürs Saaletal berechnen (Cp-Modelle)
+saale_RSS <- sum((data.Saaletal$biom - predict(Cp_Saale, newdata = data.Saaletal))^2)
+all_RSS <- sum((data.Saaletal$biom - predict(Cp_all, newdata = data.Saaletal))^2)
 
 
+saale_SPSE <- saale_RSS + 2*sigma2.max*length(coef(Cp_Saale))
+all_SPSE <- all_RSS + 2*sigma2.max*length(coef(Cp_all))
+# Saale-Modell ist besser (SPSE kleiner) zur Vorhersage des Saaletals; 
+# Ilmtaldaten bringt keine zusätzlichen Vorteile zur Vorhersage des Saaletals (keine Testdaten vorhanden)
 
 
-#SPSE berechnen
-length = dim(data.Ilmtal)[1]            #data entries
-RSS <- sum(residuals(own_model_Ilm)^2)  # residual sum squared of maximal model
-sigma2.max <- RSS/(length-length(coef(own_model_Ilm)))  # max.Modell / (#entries - #Parameters of maximal model)
-
-SPSE1 <- RSS + 2*sigma2.max*length(coef(own_model_Ilm))
-# Compute expected SPSE for the 5 best models (based on mallow's Cp)
-summary(ilm_bss)$cp[c(2,3,4)]*sigma2.max + length * sigma2.max
-
-# Saaletal
 
 
 ####################################################
@@ -232,6 +240,7 @@ summary(ilm_bss)$cp[c(2,3,4)]*sigma2.max + length * sigma2.max
 # Wechselwirkungen, d.h. unterschiedliche quantitative 
 # Effekte der Einflussgro???en in den beiden Untersuchungsgebieten.
 ####################################################
+
 
 
 
