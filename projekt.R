@@ -204,6 +204,15 @@ index <- which.min(summary(saale_bss)$cp)
 summary(saale_bss)$which[index,]
 Cp_Saale <- lm(biom~1+Corg+Cges+Corg.N+pH+P+K, data = data.Saaletal)
 
+# Best Model mit MAllows CP (Gesamter Datensatz)
+all_bss <- regsubsets(biom~as.factor(Gebiet)+(N+Corg+Cges+(Corg.N)+pH+Artenzahl+P+K)*as.factor(Gebiet), data = data.all, nbest = 3)
+summary(all_bss)$cp
+index <- which.min(summary(all_bss)$cp)
+summary(all_bss)$which[index,]
+Cp_all <- lm(biom~1+Corg+Cges+Corg.N+pH+P+K, data = data.all)
+
+
+
 
 #SPSE berechnen
 length = dim(data.Ilmtal)[1]            #data entries
