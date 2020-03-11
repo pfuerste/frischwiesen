@@ -142,6 +142,26 @@ abline(model_all_K, col = "black", lwd=2)
 #max(data.all$K)
 
 ####################################################
+# Visualize interactions of Einflussgr√∂√üen
+#################################################### 
+
+#for(i = 0, i < )
+#sort
+data.Ilmtal.sorted <- data.Ilmtal[order(data.Ilmtal$P),]
+data.first <- data.Ilmtal.sorted[1:(nrow(data.Ilmtal)/2),]
+data.second <- data.Ilmtal.sorted[(nrow(data.Ilmtal)/2)+1:nrow(data.Ilmtal),]
+
+max(data.Ilmtal$K)
+model_first <- lm(biom~1+K, data = data.first)
+model_second <- lm(biom~1+K, data = data.second)
+plot(biom~1+K, data = data.first, col = "darkgreen", pch=16, ylim=c(0,600), xlim=c(5.6, 28.7))
+par(new=TRUE)
+plot(biom~1+K, data = data.second, col = "red", pch=16, ylim=c(0,600), xlim=c(5.6, 28.7))
+abline(model_first, col = "darkgreen")
+abline(model_second, col = "red")
+
+
+####################################################
 # Korrelationskoeffizienten der einfachen Variablen 
 #################################################### 
 cor_saale_N <- cor(data.Saaletal$biom, data.Saaletal$N)
@@ -199,7 +219,7 @@ own_model_Saale <- lm(biom~1+Artenzahl+N+Corg+Cges+(Corg.N)+P+pH, data = data.Sa
 
 
 ####################################################
-# 3. Vergleichen sie die Genauigkeit der Vorhersage f¸r Biomasse f¸r das Saaletal basierend auf dem separaten und dem gemeinsamem Modell.
+# 3. Vergleichen sie die Genauigkeit der Vorhersage f?r Biomasse f?r das Saaletal basierend auf dem separaten und dem gemeinsamem Modell.
 # Verwenden sie hierbei auf geeignete Art den SPSE.
 ####################################################
 # Best Model mit Mallows Cp
@@ -221,7 +241,7 @@ max_RSS <- sum((data.Saaletal$biom - predict(max_modell, newdata = data.Saaletal
 length = dim(data.all)[1]            # data entries
 sigma2.max <- max_RSS/length  # max.Modell / #entries
 
-# SPSE f¸rs Saaletal berechnen (Cp-Modelle)
+# SPSE f?rs Saaletal berechnen (Cp-Modelle)
 saale_RSS <- sum((data.Saaletal$biom - predict(Cp_Saale, newdata = data.Saaletal))^2)
 all_RSS <- sum((data.Saaletal$biom - predict(Cp_all, newdata = data.Saaletal))^2)
 
@@ -229,7 +249,7 @@ all_RSS <- sum((data.Saaletal$biom - predict(Cp_all, newdata = data.Saaletal))^2
 saale_SPSE <- saale_RSS + 2*sigma2.max*length(coef(Cp_Saale))
 all_SPSE <- all_RSS + 2*sigma2.max*length(coef(Cp_all))
 # Saale-Modell ist besser (SPSE kleiner) zur Vorhersage des Saaletals; 
-# Ilmtaldaten bringt keine zus‰tzlichen Vorteile zur Vorhersage des Saaletals (keine Testdaten vorhanden)
+# Ilmtaldaten bringt keine zus?tzlichen Vorteile zur Vorhersage des Saaletals (keine Testdaten vorhanden)
 
 
 
