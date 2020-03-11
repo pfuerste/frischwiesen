@@ -143,23 +143,46 @@ abline(model_all_K, col = "black", lwd=2)
 
 ####################################################
 # Visualize interactions of Einflussgrößen
-#################################################### 
+####################################################
+interactions <- function(area, name) {
+  column_names <- c('P','K','pH', 'N', 'Cges', 'Corg', 'Corg.N', 'Artenzahl')
+  for(i in column_names) {
+    area.sorted <- area[order(area[[i]]),]  #sort
+    for(j in column_names) {
+      if(i != j) {
+        area.first <- area.sorted[1:ceiling(nrow(area)/2),]
+        area.second <- area.sorted[(ceiling((nrow(area)/2))+1):nrow(area),]
+        
+        xlow <- min(area[[j]])
+        xhigh <- max(area[[j]])
+        lmformula <- as.formula(paste("biom~1+",j, sep=""))
+        plottitle <- paste(name,": ", i, " against ",j, sep="")
+        subtitle <- paste("red = high values, green = low values")
+        
+        model_first <- lm(lmformula, data = area.first)
+        model_second <- lm(lmformula, data = area.second)
+        plot(lmformula, data = area.first, 
+             col = "darkgreen", 
+             pch=16, 
+             ylim=c(0,600), 
+             xlim=c(xlow, xhigh), 
+             main = plottitle, 
+             sub = subtitle)
+        par(new=TRUE)
+        plot(lmformula, data = area.second, 
+             col = "red", 
+             pch=16, 
+             ylim=c(0,600), 
+             xlim=c(xlow, xhigh))
+        abline(model_first, col = "darkgreen")
+        abline(model_second, col = "red")
+      }
+    }
+  }
+} #end function
 
-#for(i = 0, i < )
-#sort
-data.Ilmtal.sorted <- data.Ilmtal[order(data.Ilmtal$P),]
-data.first <- data.Ilmtal.sorted[1:(nrow(data.Ilmtal)/2),]
-data.second <- data.Ilmtal.sorted[(nrow(data.Ilmtal)/2)+1:nrow(data.Ilmtal),]
-
-max(data.Ilmtal$K)
-model_first <- lm(biom~1+K, data = data.first)
-model_second <- lm(biom~1+K, data = data.second)
-plot(biom~1+K, data = data.first, col = "darkgreen", pch=16, ylim=c(0,600), xlim=c(5.6, 28.7))
-par(new=TRUE)
-plot(biom~1+K, data = data.second, col = "red", pch=16, ylim=c(0,600), xlim=c(5.6, 28.7))
-abline(model_first, col = "darkgreen")
-abline(model_second, col = "red")
-
+interactions(data.Ilmtal, 'Ilmtal')
+interactions(data.Saaletal, 'Saaletal')
 
 ####################################################
 # Korrelationskoeffizienten der einfachen Variablen 
