@@ -26,6 +26,7 @@ model_ilm_Artenzahl <- lm(biom~1+Artenzahl, data = data.Ilmtal) # biomasse ~ Art
 model_ilm_pH <- lm(biom~1+pH, data = data.Ilmtal) # biomasse ~ pH
 model_ilm_K <- lm(biom~1+K, data = data.Ilmtal) # biomasse ~ Kalium
 model_ilm_Corg.N <- lm(biom~1+Corg.N, data = data.Ilmtal) # biomasse ~ Kohlenstoff/Stickstoff
+model_ilm_Cges <- lm(biom~1+Cges, data = data.Ilmtal) # biomasse ~ Cges
 
 
 # biomasse ~ Stickstoff
@@ -52,6 +53,9 @@ abline(model_ilm_K, col = "red")
 plot(biom~Corg.N, data = data.Ilmtal, col = "red", pch=16)
 abline(model_ilm_Corg.N, col = "red")
 
+# biomasse ~ Cges
+plot(biom~Cges, data = data.Ilmtal, col = "red", pch=16)
+abline(model_ilm_Cges, col = "red")
 
 ################
 ### Saaletal ###
@@ -183,7 +187,9 @@ interactions <- function(area, name) {
 
 interactions(data.Ilmtal, 'Ilmtal')
 interactions(data.Saaletal, 'Saaletal')
+interactions(data.all, 'Gesamt')
 
+mean(data.all$pH)
 ####################################################
 # Korrelationskoeffizienten der einfachen Variablen 
 #################################################### 
@@ -226,21 +232,26 @@ cor_all_Corg.N <- cor(data.all$biom, data.all$Corg.N)
 ###################################################
 
 ### Ilmtal (Alle Variablen über Threshold von 0.3 einbezogen)
-own_model_Ilm <- lm(biom~1+N+Corg+Cges+(Corg.N)+pH, data = data.Ilmtal)
+own_model_Ilm <- lm(biom~1+N+Corg+Corg.N+Cges+Corg.N:pH, data = data.Ilmtal)
 
 # Best Model mit Mallows Cp
 require("leaps")
-ilm_bss <- regsubsets(biom~1+N+Corg+Cges+(Corg.N)+pH+Artenzahl+P+K, data = data.Ilmtal, nbest = 3)
+ilm_bss <- regsubsets(biom~1+N+Corg+Corg.N+Cges+Corg.N:pH, data = data.Ilmtal, nbest = 3)
 summary(ilm_bss)$cp
 index <- which.min(summary(ilm_bss)$cp)
 summary(ilm_bss)$which[index,]
-Cp_Ilm <- lm(biom~1+Cges+(Corg.N), data = data.Ilmtal)
+Cp_Ilm <- lm(biom~1+Cges+Corg.N:pH, data = data.Ilmtal)
 
 
 ### Saaletal (Alle Variablen über Threshold von 0.3 einbezogen)
 own_model_Saale <- lm(biom~1+Artenzahl+N+Corg+Cges+(Corg.N)+P+pH, data = data.Saaletal)
+summary(own_model_Saale)
 
+# Standardize Regression-coefficients
+library("QuantPsyc")
+lm.beta(own_model_Saale)
 
+mean(data.all$biom)
 ####################################################
 # 3. Vergleichen sie die Genauigkeit der Vorhersage f?r Biomasse f?r das Saaletal basierend auf dem separaten und dem gemeinsamem Modell.
 # Verwenden sie hierbei auf geeignete Art den SPSE.
