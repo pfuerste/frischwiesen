@@ -1,25 +1,28 @@
 ################
 # Datenset laden
 ################
+# Load --------------------------------------------------------------------
 set.seed(22)
 data.all <- read.csv("frischwiesen.csv", sep = ";")
 data.Ilmtal <- data.all[data.all$Gebiet == "Ilmtal", ]
 data.Saaletal <- data.all[data.all$Gebiet == "Saaletal", ]
 
+
+# Task 1 ------------------------------------------------------------------
 ####################################################
-# 1. Leiten Sie zuna??chst getrennt fu??r das Saaletal
+# 1. Leiten Sie zunaechst getrennt fuer das Saaletal
 # und das Ilmtal geeignete lineare Modelle zur 
 # Prognose der Biomasseproduktion her.
 ####################################################
 
+# Untersuche Maße der zentralen Tendenz jeder einzelnen Variable
+summary(data.all)
 # Visualisieren der Variablen im Verh?ltnis:
 plot(data.all)
 # Jede Variable gegeneinander Plotten,
 # vielversprechende Kombinationen selektieren.
 
-##############
 ### Ilmtal ###
-##############
 model_ilm_N <- lm(biom~1+N, data = data.Ilmtal) # biomasse ~ Stickstoff
 model_ilm_Corg <- lm(biom~1+Corg, data = data.Ilmtal) # biomasse ~Kohlenstoff
 model_ilm_Artenzahl <- lm(biom~1+Artenzahl, data = data.Ilmtal) # biomasse ~ Artenzahl
@@ -57,9 +60,8 @@ abline(model_ilm_Corg.N, col = "red")
 plot(biom~Cges, data = data.Ilmtal, col = "red", pch=16)
 abline(model_ilm_Cges, col = "red")
 
-################
+
 ### Saaletal ###
-################
 model_saale_N <- lm(biom~1+N, data = data.Saaletal) # biomasse ~ Stickstoff
 model_saale_Corg <- lm(biom~1+Corg, data = data.Saaletal) # biomasse ~Kohlenstoff
 model_saale_Artenzahl <- lm(biom~1+Artenzahl, data = data.Saaletal) # biomasse ~ Artenzahl
@@ -92,6 +94,7 @@ plot(biom~Corg.N, data = data.Saaletal, col = "darkgreen", pch=16)
 abline(model_saale_Corg.N, col = "darkgreen")
 
 
+# Combined Plots ----------------------------------------------------------
 #########################
 ### Kombinierte Plots ###
 #########################
@@ -105,6 +108,8 @@ plot(biom~N, data = data.Ilmtal, col = "red", pch=16, ann=FALSE, axes=FALSE, yli
 abline(model_saale_N, col = "darkgreen")
 abline(model_ilm_N, col = "red")
 abline(model_all_N, col = "black", lwd=2)
+title(main ="Biomasse ~ Stickstoff (N)")
+legend(.45,200, legend=c("Ilmtal","Saaletal"), fill = c("red", "darkgreen"), border = FALSE, bty="n")
 
 # biomasse ~ Kohlenstoff
 model_all_Corg <- lm(biom~1+Corg, data = data.all)
@@ -114,6 +119,8 @@ plot(biom~Corg, data = data.Ilmtal, col = "red", pch=16, ann=FALSE, axes=FALSE, 
 abline(model_ilm_Corg, col = "red")
 abline(model_saale_Corg, col = "darkgreen")
 abline(model_all_Corg, col = "black", lwd=2)
+title(main ="Biomasse ~ Kohlenstoff (Corg)")
+legend(3.5,200, legend=c("Ilmtal","Saaletal"), fill = c("red", "darkgreen"), border = FALSE, bty="n")
 
 # biomasse ~ Artenzahl
 model_all_Artenzahl <- lm(biom~1+Artenzahl, data = data.all)
@@ -123,6 +130,9 @@ plot(biom~Artenzahl, data = data.Ilmtal, col = "red", pch=16, ylim=c(ylow,600), 
 abline(model_saale_Artenzahl, col = "darkgreen")
 abline(model_ilm_Artenzahl, col = "red")
 abline(model_all_Artenzahl, col = "black", lwd=2)
+title(main ="Biomasse ~ Artenzahl")
+legend(7,200, legend=c("Ilmtal","Saaletal"), fill = c("red", "darkgreen"), border = FALSE, bty="n")
+
 
 # biomasse ~ pH
 model_all_pH <- lm(biom~1+pH, data = data.all)
@@ -132,6 +142,9 @@ plot(biom~pH, data = data.Ilmtal, col = "red", pch=16, ylim=c(ylow,600), xlim=c(
 abline(model_saale_pH, col = "darkgreen")
 abline(model_ilm_pH, col = "red")
 abline(model_all_pH, col = "black", lwd=2)
+title(main ="Biomasse ~ pH")
+legend(7,200, legend=c("Ilmtal","Saaletal"), fill = c("red", "darkgreen"), border = FALSE, bty="n")
+
 
 # biomasse ~ Kalium
 model_all_K <- lm(biom~1+K, data = data.all)
@@ -141,12 +154,17 @@ plot(biom~K, data = data.Ilmtal, col = "red", pch=16, ylim=c(ylow,600), xlim=c(5
 abline(model_ilm_K, col = "red")
 abline(model_saale_K, col = "darkgreen")
 abline(model_all_K, col = "black", lwd=2)
+title(main ="Biomasse ~ Kalium (K)")
+legend(33,200, legend=c("Ilmtal","Saaletal"), fill = c("red", "darkgreen"), border = FALSE, bty="n")
 
-#min(data.all$K)
-#max(data.all$K)
 
+
+# Task 2 ------------------------------------------------------------------
 ####################################################
-# Visualize interactions of Einflussgrößen
+# 2. Analysieren Sie dann beide Teildatensaetze gemeinsam
+# und untersuchen Sie insbesondere das Vorliegen von 
+# Wechselwirkungen, d.h. unterschiedliche quantitative 
+# Effekte der Einflussgroessen in den beiden Untersuchungsgebieten.
 ####################################################
 interactions <- function(area, name) {
   column_names <- c('P','K','pH', 'N', 'Cges', 'Corg', 'Corg.N', 'Artenzahl')
@@ -189,7 +207,7 @@ interactions(data.Ilmtal, 'Ilmtal')
 interactions(data.Saaletal, 'Saaletal')
 interactions(data.all, 'Gesamt')
 
-mean(data.all$pH)
+
 ####################################################
 # Korrelationskoeffizienten der einfachen Variablen 
 #################################################### 
@@ -227,10 +245,14 @@ cor_all_Corg.N <- cor(data.all$biom, data.all$Corg.N)
 
 
 ###################################################
-# Model Selection basierend auf Mallows Cp
+# Model-Selection basierend auf Mallows Cp
 # Maximales Modell für Gebiete erstellen:
 ###################################################
 
+# Model Selection Ilmtal --------------------------------------------------
+# Korrelationskoeffizienten: Variablen untereinander verglichen, in Matrixschreibweise
+vec <- c('P','K','pH', 'N', 'Cges', 'Corg', 'Corg.N', 'Artenzahl', 'biom')
+cor(data.Ilmtal[,vec])
 ### Ilmtal (Alle Variablen über Threshold von 0.3 einbezogen)
 own_model_Ilm <- lm(biom~1+N+Corg+Corg.N+Cges+Corg.N:pH, data = data.Ilmtal)
 
@@ -243,19 +265,10 @@ summary(ilm_bss)$which[index,]
 Cp_Ilm <- lm(biom~1+Cges+Corg.N:pH, data = data.Ilmtal)
 
 
-### Saaletal (Alle Variablen über Threshold von 0.3 einbezogen)
+# Model Selection Saaletal ------------------------------------------------
 own_model_Saale <- lm(biom~1+Artenzahl+N+Corg+Cges+(Corg.N)+P+pH, data = data.Saaletal)
 summary(own_model_Saale)
 
-# Standardize Regression-coefficients
-library("QuantPsyc")
-lm.beta(own_model_Saale)
-
-mean(data.all$biom)
-####################################################
-# 3. Vergleichen sie die Genauigkeit der Vorhersage f?r Biomasse f?r das Saaletal basierend auf dem separaten und dem gemeinsamem Modell.
-# Verwenden sie hierbei auf geeignete Art den SPSE.
-####################################################
 # Best Model mit Mallows Cp
 saale_bss <- regsubsets(biom~1+N+Corg+Cges+(Corg.N)+pH+Artenzahl+P+K, data = data.Saaletal, nbest = 3)
 summary(saale_bss)$cp
@@ -263,7 +276,22 @@ index <- which.min(summary(saale_bss)$cp)
 summary(saale_bss)$which[index,]
 Cp_Saale <- lm(biom~1+Corg+Cges+Corg.N+pH+P+K, data = data.Saaletal)
 
-# Best Model mit MAllows CP (Gesamter Datensatz)
+# Standardize Regression-coefficients
+library("QuantPsyc")
+lm.beta(own_model_Saale)
+
+
+# Task 3 ------------------------------------------------------------------
+####################################################
+# 3. Vergleichen sie die Genauigkeit der Vorhersage 
+# fuer Biomasse fuer das Saaletal basierend auf dem 
+# separaten und dem gemeinsamem Modell.
+# Verwenden sie hierbei auf geeignete Art den SPSE.
+####################################################
+
+
+# Model selection Gesamtdatensatz -----------------------------------------
+# Best Model mit Mallows Cp (Gesamter Datensatz)
 all_bss <- regsubsets(biom~as.factor(Gebiet)+(N+Corg+Cges+(Corg.N)+pH+Artenzahl+P+K)*as.factor(Gebiet), data = data.all, nbest = 3)
 summary(all_bss)$cp
 index <- which.min(summary(all_bss)$cp)
@@ -275,7 +303,9 @@ max_RSS <- sum((data.Saaletal$biom - predict(max_modell, newdata = data.Saaletal
 length = dim(data.all)[1]            # data entries
 sigma2.max <- max_RSS/length  # max.Modell / #entries
 
-# SPSE f?rs Saaletal berechnen (Cp-Modelle)
+
+# SPSE --------------------------------------------------------------------
+# SPSE fuers Saaletal berechnen (Cp-Modelle)
 saale_RSS <- sum((data.Saaletal$biom - predict(Cp_Saale, newdata = data.Saaletal))^2)
 all_RSS <- sum((data.Saaletal$biom - predict(Cp_all, newdata = data.Saaletal))^2)
 
@@ -288,12 +318,7 @@ all_SPSE <- all_RSS + 2*sigma2.max*length(coef(Cp_all))
 
 
 
-####################################################
-# 2. Analysieren Sie dann beide Teildatensa??tze gemeinsam
-# und untersuchen Sie insbesondere das Vorliegen von 
-# Wechselwirkungen, d.h. unterschiedliche quantitative 
-# Effekte der Einflussgro???en in den beiden Untersuchungsgebieten.
-####################################################
+
 
 
 
