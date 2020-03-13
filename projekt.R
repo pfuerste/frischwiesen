@@ -68,6 +68,8 @@ model_saale_Artenzahl <- lm(biom~1+Artenzahl, data = data.Saaletal) # biomasse ~
 model_saale_pH <- lm(biom~1+pH, data = data.Saaletal) # biomasse ~ pH
 model_saale_K <- lm(biom~1+K, data = data.Saaletal) # biomasse ~ Kalium
 model_saale_Corg.N <- lm(biom~1+Corg.N, data = data.Saaletal) # biomasse ~ Kohlenstoff/Stickstoff
+model_Saale_Cges <-  lm(biom~1+Cges, data = data.Saaletal) # biomasse ~ Cges
+model_Saale_P <- lm(biom~1+P, data = data.Saaletal) # biomasse ~ Phosphor
 
 # biomasse ~ Stickstoff
 plot(biom~N, data = data.Saaletal, col = "darkgreen", pch=16)
@@ -92,6 +94,14 @@ abline(model_saale_K, col = "darkgreen")
 # biomasse ~ Corg.N
 plot(biom~Corg.N, data = data.Saaletal, col = "darkgreen", pch=16)
 abline(model_saale_Corg.N, col = "darkgreen")
+
+# biomasse ~ Cges
+plot(biom~Cges, data = data.Saaletal, col = "darkgreen", pch=16)
+abline(model_Saale_Cges, col = "darkgreen")
+
+# biomasse ~ P
+plot(biom~P, data = data.Saaletal, col = "darkgreen", pch=16)
+abline(model_Saale_P, col = "darkgreen")
 
 
 # Combined Plots ----------------------------------------------------------
@@ -208,6 +218,7 @@ interactions(data.Saaletal, 'Saaletal')
 interactions(data.all, 'Gesamt')
 
 
+# Correlation Coefficient -------------------------------------------------------
 ####################################################
 # Korrelationskoeffizienten der einfachen Variablen 
 #################################################### 
@@ -266,15 +277,22 @@ Cp_Ilm <- lm(biom~1+Cges+Corg.N:pH, data = data.Ilmtal)
 
 
 # Model Selection Saaletal ------------------------------------------------
-own_model_Saale <- lm(biom~1+Artenzahl+N+Corg+Cges+(Corg.N)+P+pH, data = data.Saaletal)
+# old: Artenzahl+N+Corg+Cges+(Corg.N)+P+pH
+# new: N+Corg+Artenzahl+Corg.N+pH+P+Artenzahl:N+Corg:P+P:N+P:K
+# Korrelationskoeffizienten: Variablen untereinander verglichen, in Matrixschreibweise
+vec <- c('P','K','pH', 'N', 'Cges', 'Corg', 'Corg.N', 'Artenzahl', 'biom')
+cor(data.Saaletal[,vec])
+own_model_Saale <- lm(biom~1+N+Corg+Artenzahl+Corg.N+pH+P+N:Artenzahl+Corg:P+P:N+P:K, data = data.Saaletal)
 summary(own_model_Saale)
+#plot(own_model_Saale, which=1)
 
 # Best Model mit Mallows Cp
-saale_bss <- regsubsets(biom~1+N+Corg+Cges+(Corg.N)+pH+Artenzahl+P+K, data = data.Saaletal, nbest = 3)
+saale_bss <- regsubsets(biom~1+N+Corg+Artenzahl+pH+P+Corg.N+K+Cges, data = data.Saaletal, nbest=1)
 summary(saale_bss)$cp
 index <- which.min(summary(saale_bss)$cp)
 summary(saale_bss)$which[index,]
 Cp_Saale <- lm(biom~1+Corg+Cges+Corg.N+pH+P+K, data = data.Saaletal)
+summary(Cp_Saale)
 
 # Standardize Regression-coefficients
 library("QuantPsyc")
@@ -297,25 +315,26 @@ summary(all_bss)$cp
 index <- which.min(summary(all_bss)$cp)
 summary(all_bss)$which[index,]
 Cp_all <- lm(biom~1+N+Corg+Cges+Corg.N+as.factor(Gebiet):Corg+as.factor(Gebiet):pH, data = data.all)
+summary(Cp_all)
 
-max_modell <- lm(biom~(N+Corg+Cges+(Corg.N)+pH+Artenzahl+P+K), data = data.Saaletal)
-max_RSS <- sum((data.Saaletal$biom - predict(max_modell, newdata = data.Saaletal))^2)
+
+# SPSE-Saale --------------------------------------------------------------------
+max_model_Saale <- lm(biom~1+Corg+Cges+Corg.N+pH+P+K, data = data.Saaletal)
+max_RSS_Saale <- sum((data.Saaletal$biom - predict(max_model_Saale, newdata = data.Saaletal))^2)
+length = dim(data.Saaletal)[1]            # data entries
+sigma2.max_Saale <- max_RSS_Saale/(length - length(coef(max_model_Saale)))  # max.Modell / #entries - #predictor_variables
+
+# SPSE-Gesamt -------------------------------------------------------------
+max_model_Gesamt <- lm(biom~1+N+Corg+Cges+Corg.N+as.factor(Gebiet):Corg+as.factor(Gebiet):pH, data = data.all)
+max_RSS_Gesamt <- sum((data.Saaletal$biom - predict(max_model_Gesamt, newdata = data.Saaletal))^2)
 length = dim(data.all)[1]            # data entries
-sigma2.max <- max_RSS/length  # max.Modell / #entries
+sigma2.max_Gesamt <- max_RSS_Gesamt/(length - length(coef(max_model_Gesamt)))  # max.Modell / #entries - #predictor_variables
 
 
-# SPSE --------------------------------------------------------------------
-# SPSE fuers Saaletal berechnen (Cp-Modelle)
-saale_RSS <- sum((data.Saaletal$biom - predict(Cp_Saale, newdata = data.Saaletal))^2)
-all_RSS <- sum((data.Saaletal$biom - predict(Cp_all, newdata = data.Saaletal))^2)
-
-
-saale_SPSE <- saale_RSS + 2*sigma2.max*length(coef(Cp_Saale))
-all_SPSE <- all_RSS + 2*sigma2.max*length(coef(Cp_all))
+saale_SPSE <- max_RSS_Saale + 2*sigma2.max*length(coef(max_model_Saale))
+all_SPSE <- max_RSS_Gesamt + 2*sigma2.max*length(coef(max_model_Gesamt))
 # Saale-Modell ist besser (SPSE kleiner) zur Vorhersage des Saaletals; 
 # Ilmtaldaten bringt keine zus?tzlichen Vorteile zur Vorhersage des Saaletals (keine Testdaten vorhanden)
-
-
 
 
 
