@@ -265,11 +265,11 @@ cor_all_Corg.N <- cor(data.all$biom, data.all$Corg.N)
 vec <- c('P','K','pH', 'N', 'Cges', 'Corg', 'Corg.N', 'Artenzahl', 'biom')
 cor(data.Ilmtal[,vec])
 ### Ilmtal (Alle Variablen über Threshold von 0.3 einbezogen)
-own_model_Ilm <- lm(biom~1+N+Corg+Corg.N+Cges+Corg.N:pH, data = data.Ilmtal)
+own_model_Ilm <- lm(biom~1+N+Corg+Cges+Corg.N:pH+(P+K+N):Artenzahl+N:P, data = data.Ilmtal)
 
 # Best Model mit Mallows Cp
 require("leaps")
-ilm_bss <- regsubsets(biom~1+N+Corg+Corg.N+Cges+Corg.N:pH, data = data.Ilmtal, nbest = 3)
+ilm_bss <- regsubsets(biom~1+N+Corg+Cges+Corg.N:pH+(P+K+N):Artenzahl+N:P, data = data.Ilmtal, nbest = 3)
 summary(ilm_bss)$cp
 index <- which.min(summary(ilm_bss)$cp)
 summary(ilm_bss)$which[index,]
@@ -282,17 +282,18 @@ Cp_Ilm <- lm(biom~1+Cges+Corg.N:pH, data = data.Ilmtal)
 # Korrelationskoeffizienten: Variablen untereinander verglichen, in Matrixschreibweise
 vec <- c('P','K','pH', 'N', 'Cges', 'Corg', 'Corg.N', 'Artenzahl', 'biom')
 cor(data.Saaletal[,vec])
-own_model_Saale <- lm(biom~1+N+Corg+Artenzahl+Corg.N+pH+P+N:Artenzahl+Corg:P+P:N+P:K, data = data.Saaletal)
+own_model_Saale <- lm(biom~1+N+Corg+Artenzahl+Corg.N+P+N:Artenzahl+Corg:P+P:N+P:K, data = data.Saaletal)
 summary(own_model_Saale)
 #plot(own_model_Saale, which=1)
 
 # Best Model mit Mallows Cp
-saale_bss <- regsubsets(biom~1+N+Corg+Artenzahl+pH+P+Corg.N+K+Cges, data = data.Saaletal, nbest=1)
+saale_bss <- regsubsets(biom~1+N+Corg+Artenzahl+Corg.N+P+K+N:Artenzahl+Corg:P+P:N+P:K, data = data.Saaletal, nbest=1)
 summary(saale_bss)$cp
 index <- which.min(summary(saale_bss)$cp)
 summary(saale_bss)$which[index,]
-Cp_Saale <- lm(biom~1+Corg+Cges+Corg.N+pH+P+K, data = data.Saaletal)
+Cp_Saale <- lm(biom~1+Artenzahl+P:K, data = data.Saaletal)
 summary(Cp_Saale)
+  
 
 # Standardize Regression-coefficients
 library("QuantPsyc")
@@ -331,8 +332,8 @@ length = dim(data.all)[1]            # data entries
 sigma2.max_Gesamt <- max_RSS_Gesamt/(length - length(coef(max_model_Gesamt)))  # max.Modell / #entries - #predictor_variables
 
 
-saale_SPSE <- max_RSS_Saale + 2*sigma2.max*length(coef(max_model_Saale))
-all_SPSE <- max_RSS_Gesamt + 2*sigma2.max*length(coef(max_model_Gesamt))
+saale_SPSE <- max_RSS_Saale + 2*sigma2.max_Saale*length(coef(max_model_Saale))
+all_SPSE <- max_RSS_Gesamt + 2*sigma2.max_Gesamt*length(coef(max_model_Gesamt))
 # Saale-Modell ist besser (SPSE kleiner) zur Vorhersage des Saaletals; 
 # Ilmtaldaten bringt keine zus?tzlichen Vorteile zur Vorhersage des Saaletals (keine Testdaten vorhanden)
 
