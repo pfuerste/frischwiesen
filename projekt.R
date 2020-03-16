@@ -269,7 +269,7 @@ own_model_Ilm <- lm(biom~1+N+Corg+Cges+Corg.N:pH+(P+K+N):Artenzahl+N:P, data = d
 
 # Best Model mit Mallows Cp
 require("leaps")
-ilm_bss <- regsubsets(biom~1+N+Corg+Cges+Corg.N:pH+(P+K+N):Artenzahl+N:P, data = data.Ilmtal, nbest = 3)
+ilm_bss <- regsubsets(biom~1+N+Corg+Cges+Corg.N:pH+(P+K+N):Artenzahl+N:P, data = data.Ilmtal)
 summary(ilm_bss)$cp
 index <- which.min(summary(ilm_bss)$cp)
 summary(ilm_bss)$which[index,]
@@ -279,6 +279,7 @@ Cp_Ilm <- lm(biom~1+Cges+Corg.N:pH, data = data.Ilmtal)
 # Model Selection Saaletal ------------------------------------------------
 # old: Artenzahl+N+Corg+Cges+(Corg.N)+P+pH
 # new: N+Corg+Artenzahl+Corg.N+pH+P+Artenzahl:N+Corg:P+P:N+P:K
+# new new: N+Corg+Artenzahl+Corg.N+P+K+N:Artenzahl+Corg:P+P:N+P:K
 # Korrelationskoeffizienten: Variablen untereinander verglichen, in Matrixschreibweise
 vec <- c('P','K','pH', 'N', 'Cges', 'Corg', 'Corg.N', 'Artenzahl', 'biom')
 cor(data.Saaletal[,vec])
@@ -287,13 +288,12 @@ summary(own_model_Saale)
 #plot(own_model_Saale, which=1)
 
 # Best Model mit Mallows Cp
-saale_bss <- regsubsets(biom~1+N+Corg+Artenzahl+Corg.N+P+K+N:Artenzahl+Corg:P+P:N+P:K, data = data.Saaletal, nbest=1)
+saale_bss <- regsubsets(biom~1+N+Corg+Artenzahl+Corg.N+pH+P+Artenzahl:N+Corg:P+P:N+P:K, data = data.Saaletal, nbest=1)
 summary(saale_bss)$cp
 index <- which.min(summary(saale_bss)$cp)
 summary(saale_bss)$which[index,]
 Cp_Saale <- lm(biom~1+Artenzahl+P:K, data = data.Saaletal)
 summary(Cp_Saale)
-  
 
 # Standardize Regression-coefficients
 library("QuantPsyc")
@@ -311,7 +311,7 @@ lm.beta(own_model_Saale)
 
 # Model selection Gesamtdatensatz -----------------------------------------
 # Best Model mit Mallows Cp (Gesamter Datensatz)
-all_bss <- regsubsets(biom~as.factor(Gebiet)+(N+Corg+Cges+(Corg.N)+pH+Artenzahl+P+K)*as.factor(Gebiet), data = data.all, nbest = 3)
+all_bss <- regsubsets(biom~(N+Corg+Cges+Corg.N+pH+Artenzahl+P+K)*as.factor(Gebiet), data = data.all, nbest = 3)
 summary(all_bss)$cp
 index <- which.min(summary(all_bss)$cp)
 summary(all_bss)$which[index,]
@@ -339,7 +339,37 @@ all_SPSE <- max_RSS_Gesamt + 2*sigma2.max_Gesamt*length(coef(max_model_Gesamt))
 
 
 
+# SIMULATION --------------------------------------------------------------
+###########################################################################
+# Wählen sie ein „wahres Modell“ in Anlehnung an die Ergebnisse des ersten
+# Teils und eine Designmatrix, die zufällig ausgewählte Zeilen der realen
+# Design-Matrix (mit Wiederholung) enthält. Simulieren Sie dann mehrfach 
+# Pseudo-Beobachtungen der Zielgröße und führen Sie für die so simulierten
+# Pseudo-Datensätze die Modellwahl mit Hilfe von Mallow’s Cp-Kriterium durch.
+############################################################################
+
+lmformula <- as.formula(paste("biom~1+N+Corg+Cges+Corg.N+as.factor(Gebiet):Corg+as.factor(Gebiet):pH", sep=""))
+true_model <- lm(lmformula, data = data.all)
 
 
 
+n <- c(50, 100, 1000, 10000)
+model_selection_matrix <- data.frame(matrix(0, ncol = 5, nrow = length(n)))
+rownames(model_selection_matrix) <- c(50, 100, 1000, 10000)
+colnames(model_selection_matrix) <- c('N', 'Cges', 'Corg.N', 'Corg:as.factor(Gebiet)Saaletal', 'as.factor(Gebiet)Ilmtal:pH')
 
+row.index <- 1
+for(i in n) {
+  bool_model = c()
+  for(j in 1:100) {
+    data.prediction <- data.all[sample(1:dim(data.all)[1],i,replace=TRUE),]
+    data.prediction$biom <- predict(true_model, data = data.prediction) + rnorm(i, mean = 0, sd = sd(data.all$biom))
+    
+    minCp <- regsubsets(lmformula, data = data.prediction)
+    index <- which.min(summary(minCp)$cp)
+    summary(minCp)$which[index,]
+    bool_model = rbind(bool_model, c(summary(minCp)$which[index,]))
+    model_selection_matrix[row.index,index] = model_selection_matrix[row.index, index] + 1
+  }
+  row.index <-  row.index+1
+}
