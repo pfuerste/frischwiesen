@@ -363,15 +363,15 @@ summary(Cp_all)
 Cp_all2 <- lm(biom~1+Cges+P:Gebiet+Corg.N:Gebiet+Corg, data=data.all)
 summary(Cp_all2)
 
-lm.beta(Cp_all2)
+
 # SPSE-Saale --------------------------------------------------------------------
-max_model_Saale <- lm(biom~1+Corg+Cges+Corg.N+pH+P+K, data = data.Saaletal)
+max_model_Saale <- lm(biom~1+P:N+pH+Cges+Corg+Corg.N, data = data.Saaletal)
 max_RSS_Saale <- sum((data.Saaletal$biom - predict(max_model_Saale, newdata = data.Saaletal))^2)
 length = dim(data.Saaletal)[1]            # data entries
 sigma2.max_Saale <- max_RSS_Saale/(length - length(coef(max_model_Saale)))  # max.Modell / #entries - #predictor_variables
 
 # SPSE-Gesamt -------------------------------------------------------------
-max_model_Gesamt <- lm(biom~1+N+Corg+Cges+Corg.N+as.factor(Gebiet):Corg+as.factor(Gebiet):pH, data = data.all)
+max_model_Gesamt <- lm(biom~1+Cges+P:Gebiet+Corg.N:Gebiet+Corg, data = data.all)
 max_RSS_Gesamt <- sum((data.Saaletal$biom - predict(max_model_Gesamt, newdata = data.Saaletal))^2)
 length = dim(data.all)[1]            # data entries
 sigma2.max_Gesamt <- max_RSS_Gesamt/(length - length(coef(max_model_Gesamt)))  # max.Modell / #entries - #predictor_variables
@@ -383,7 +383,6 @@ all_SPSE <- max_RSS_Gesamt + 2*sigma2.max_Gesamt*length(coef(max_model_Gesamt))
 # Ilmtaldaten bringt keine zus?tzlichen Vorteile zur Vorhersage des Saaletals (keine Testdaten vorhanden)
 
 
-
 # SIMULATION --------------------------------------------------------------
 ###########################################################################
 # Wählen sie ein „wahres Modell“ in Anlehnung an die Ergebnisse des ersten
@@ -392,29 +391,31 @@ all_SPSE <- max_RSS_Gesamt + 2*sigma2.max_Gesamt*length(coef(max_model_Gesamt))
 # Pseudo-Beobachtungen der Zielgröße und führen Sie für die so simulierten
 # Pseudo-Datensätze die Modellwahl mit Hilfe von Mallow’s Cp-Kriterium durch.
 ############################################################################
-
-lmformula <- as.formula(paste("biom~1+N+Corg+Cges+Corg.N+as.factor(Gebiet):Corg+as.factor(Gebiet):pH", sep=""))
+maxformula <- as.formula(paste("biom~1+(N+Corg+Cges+pH+Artenzahl)*Gebiet+P:Gebiet+Corg.N:Gebiet", sep=""))
+lmformula <- as.formula(paste("biom~1+Corg+Cges+Corg.N:Gebiet+P:Gebiet", sep=""))
 true_model <- lm(lmformula, data = data.all)
-
-
+maxmodel <- lm(maxformula, data = data.all)
+summary(maxmodel)
 
 n <- c(50, 100, 1000, 10000)
-model_selection_matrix <- data.frame(matrix(0, ncol = 5, nrow = length(n)))
+model_selection_matrix <- data.frame(matrix(0, ncol = 15, nrow = length(n)))
 rownames(model_selection_matrix) <- c(50, 100, 1000, 10000)
-colnames(model_selection_matrix) <- c('N', 'Cges', 'Corg.N', 'Corg:as.factor(Gebiet)Saaletal', 'as.factor(Gebiet)Ilmtal:pH')
+colnames(model_selection_matrix) <- c('N', 'Corg', 'Cges', 'pH', 'Artenzahl', 'GebietSaaletal',
+                                      'N:GebietSaaletal', 'Corg:GebietSaaletal', 'Cges:GebietSaaletal', 'pH:GebietSaaletal', 'Artenzahl:GebietSaaletal',
+                                      'GebietIlmtal:P', 'GebietSaaletal:P', 'GebietIlmtal:Corg.N', 'GebietSaaletal:Corg.N')
 
 row.index <- 1
 for(i in n) {
   bool_model = c()
   for(j in 1:100) {
     data.prediction <- data.all[sample(1:dim(data.all)[1],i,replace=TRUE),]
-    data.prediction$biom <- predict(true_model, data = data.prediction) + rnorm(i, mean = 0, sd = sd(data.all$biom))
-    
-    minCp <- regsubsets(lmformula, data = data.prediction)
+    data.prediction$biom <- predict(true_model, newdata = data.prediction) + rnorm(i, mean = 0, sd = sd(data.all$biom))
+
+    minCp <- regsubsets(maxformula, data = data.prediction)
     index <- which.min(summary(minCp)$cp)
     summary(minCp)$which[index,]
     bool_model = rbind(bool_model, c(summary(minCp)$which[index,]))
-    model_selection_matrix[row.index,index] = model_selection_matrix[row.index, index] + 1
+    model_selection_matrix[row.index, index] = model_selection_matrix[row.index, index] + 1
   }
   row.index <-  row.index+1
 }
