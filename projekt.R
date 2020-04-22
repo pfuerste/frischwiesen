@@ -397,25 +397,37 @@ true_model <- lm(lmformula, data = data.all)
 maxmodel <- lm(maxformula, data = data.all)
 summary(maxmodel)
 
-n <- c(50, 100, 1000, 10000)
-model_selection_matrix <- data.frame(matrix(0, ncol = 15, nrow = length(n)))
-rownames(model_selection_matrix) <- c(50, 100, 1000, 10000)
+
+
+true_list <- c('Corg','Cges','GebietIlmtal:Corg.N', 'GebietSaaletal:Corg.N', 'GebietIlmtal:P', 'GebietSaaletal:P')
+n <- c(50, 100, 500, 1000)
+model_selection_matrix <- data.frame(matrix(0, ncol = 16, nrow = length(n)))
+rownames(model_selection_matrix) <- c(50, 100, 500, 1000)
 colnames(model_selection_matrix) <- c('N', 'Corg', 'Cges', 'pH', 'Artenzahl', 'GebietSaaletal',
                                       'N:GebietSaaletal', 'Corg:GebietSaaletal', 'Cges:GebietSaaletal', 'pH:GebietSaaletal', 'Artenzahl:GebietSaaletal',
-                                      'GebietIlmtal:P', 'GebietSaaletal:P', 'GebietIlmtal:Corg.N', 'GebietSaaletal:Corg.N')
+                                      'GebietIlmtal:P', 'GebietSaaletal:P', 'GebietIlmtal:Corg.N', 'GebietSaaletal:Corg.N', 'true_model_included')
 
 row.index <- 1
 for(i in n) {
   bool_model = c()
-  for(j in 1:100) {
+  model_count <- 0
+  for(j in 1:1000) {
     data.prediction <- data.all[sample(1:dim(data.all)[1],i,replace=TRUE),]
     data.prediction$biom <- predict(true_model, newdata = data.prediction) + rnorm(i, mean = 0, sd = sd(data.all$biom))
 
     minCp <- regsubsets(maxformula, data = data.prediction)
     index <- which.min(summary(minCp)$cp)
     summary(minCp)$which[index,]
+    # if all predictor-variables of the true model are true, then increas model_count by 1
+    bool <- isTRUE(c(summary(minCp)$which[index,])[true_list])
+    if(bool == TRUE) {
+      model_count <- model_count + 1
+    }
     bool_model = rbind(bool_model, c(summary(minCp)$which[index,]))
-    model_selection_matrix[row.index, index] = model_selection_matrix[row.index, index] + 1
+    #model_selection_matrix[row.index, index] = model_selection_matrix[row.index, index] + 1
   }
+  model_selection_matrix[row.index,1:15] <- colSums(bool_model[,-1])
+  model_selection_matrix$true_model_included[row.index] <- model_count
   row.index <-  row.index+1
 }
+
