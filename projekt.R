@@ -30,6 +30,7 @@ model_ilm_pH <- lm(biom~1+pH, data = data.Ilmtal) # biomasse ~ pH
 model_ilm_K <- lm(biom~1+K, data = data.Ilmtal) # biomasse ~ Kalium
 model_ilm_Corg.N <- lm(biom~1+Corg.N, data = data.Ilmtal) # biomasse ~ Kohlenstoff/Stickstoff
 model_ilm_Cges <- lm(biom~1+Cges, data = data.Ilmtal) # biomasse ~ Cges
+model_ilm_P <- lm(biom~1+P, data = data.Ilmtal) # biomasse ~ P
 
 
 # biomasse ~ Stickstoff
@@ -68,8 +69,8 @@ model_saale_Artenzahl <- lm(biom~1+Artenzahl, data = data.Saaletal) # biomasse ~
 model_saale_pH <- lm(biom~1+pH, data = data.Saaletal) # biomasse ~ pH
 model_saale_K <- lm(biom~1+K, data = data.Saaletal) # biomasse ~ Kalium
 model_saale_Corg.N <- lm(biom~1+Corg.N, data = data.Saaletal) # biomasse ~ Kohlenstoff/Stickstoff
-model_Saale_Cges <-  lm(biom~1+Cges, data = data.Saaletal) # biomasse ~ Cges
-model_Saale_P <- lm(biom~1+P, data = data.Saaletal) # biomasse ~ Phosphor
+model_saale_Cges <-  lm(biom~1+Cges, data = data.Saaletal) # biomasse ~ Cges
+model_saale_P <- lm(biom~1+P, data = data.Saaletal) # biomasse ~ Phosphor
 
 # biomasse ~ Stickstoff
 plot(biom~N, data = data.Saaletal, col = "darkgreen", pch=16)
@@ -167,6 +168,41 @@ abline(model_all_K, col = "black", lwd=2)
 title(main ="Biomasse ~ Kalium (K)")
 legend(33,200, legend=c("Ilmtal","Saaletal"), fill = c("red", "darkgreen"), border = FALSE, bty="n")
 
+
+# biomasse ~ Corg.N
+model_all_Corg.N <- lm(biom~1+Corg.N, data = data.all)
+plot(biom~Corg.N, data = data.Saaletal, col = "darkgreen", pch=16, ylim=c(ylow,600), xlim=c(3.66, 9.62))
+par(new=TRUE)
+plot(biom~Corg.N, data = data.Ilmtal, col = "red", pch=16, ylim=c(ylow,600), xlim=c(3.66, 9.62))
+abline(model_ilm_Corg.N, col = "red")
+abline(model_saale_Corg.N, col = "darkgreen")
+abline(model_all_Corg.N, col = "black", lwd=2)
+title(main ="Biomasse ~ Kohlenstoff/Stickstoff (Corg.N)")
+legend(3.5,200, legend=c("Ilmtal","Saaletal"), fill = c("red", "darkgreen"), border = FALSE, bty="n")
+
+
+# biomasse ~ Cges
+model_all_Cges <- lm(biom~1+Cges, data = data.all)
+plot(biom~Cges, data = data.Saaletal, col = "darkgreen", pch=16, ylim=c(ylow,600), xlim=c(2.379, 8.576))
+par(new=TRUE)
+plot(biom~Cges, data = data.Ilmtal, col = "red", pch=16, ylim=c(ylow,600), xlim=c(2.379, 8.576))
+abline(model_ilm_Cges, col = "red")
+abline(model_saale_Cges, col = "darkgreen")
+abline(model_all_Cges, col = "black", lwd=2)
+title(main ="Biomasse ~ Kohlenstoff-Gesamt (Cges)")
+legend(6.6,200, legend=c("Ilmtal","Saaletal"), fill = c("red", "darkgreen"), border = FALSE, bty="n")
+
+
+# biomasse ~ Phosphor
+model_all_P <- lm(biom~1+P, data = data.all)
+plot(biom~P, data = data.Saaletal, col = "darkgreen", pch=16, ylim=c(ylow,600), xlim=c(1.4, 25))
+par(new=TRUE)
+plot(biom~P, data = data.Ilmtal, col = "red", pch=16, ylim=c(ylow,600), xlim=c(1.4, 25))
+abline(model_ilm_P, col = "red")
+abline(model_saale_P, col = "darkgreen")
+abline(model_all_P, col = "black", lwd=2)
+title(main ="Biomasse ~ Phosphor (P)")
+legend(18,200, legend=c("Ilmtal","Saaletal"), fill = c("red", "darkgreen"), border = FALSE, bty="n")
 
 
 # Task 2 ------------------------------------------------------------------
