@@ -349,14 +349,21 @@ lm.beta(own_model_Saale)
 
 # Model selection Gesamtdatensatz -----------------------------------------
 # Best Model mit Mallows Cp (Gesamter Datensatz)
-all_bss <- regsubsets(biom~(N+Corg+Cges+Corg.N+pH+Artenzahl+P+K)*as.factor(Gebiet), data = data.all, nbest = 3)
+#all_bss <- regsubsets(biom~(N+Corg+Cges+Corg.N+pH+Artenzahl+P+K)*as.factor(Gebiet), data = data.all, nbest = 3)
+all_bss <- regsubsets(biom~(N+Corg+Cges+pH+Artenzahl)*as.factor(Gebiet)+P:as.factor(Gebiet)+Corg.N:as.factor(Gebiet), data = data.all, nbest = 3)
+
+data.all$Gebiet <- as.factor(data.all$Gebiet)
+str(data.all)
 summary(all_bss)$cp
 index <- which.min(summary(all_bss)$cp)
 summary(all_bss)$which[index,]
 Cp_all <- lm(biom~1+N+Corg+Cges+Corg.N+as.factor(Gebiet):Corg+as.factor(Gebiet):pH, data = data.all)
 summary(Cp_all)
+# Visuelle Inspektion um MAximalmodell zu erstellen
+Cp_all2 <- lm(biom~1+Cges+P:Gebiet+Corg.N:Gebiet+Corg, data=data.all)
+summary(Cp_all2)
 
-
+lm.beta(Cp_all2)
 # SPSE-Saale --------------------------------------------------------------------
 max_model_Saale <- lm(biom~1+Corg+Cges+Corg.N+pH+P+K, data = data.Saaletal)
 max_RSS_Saale <- sum((data.Saaletal$biom - predict(max_model_Saale, newdata = data.Saaletal))^2)
