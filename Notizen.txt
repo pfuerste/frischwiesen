@@ -1,0 +1,49 @@
+Bzgl Wechselwirkungen:
+
+- Ilmtal:
+-- biom ~ Artenzahl | P: 
+--- Hoher Phosphorgehalt: Kaum Einfluss von Artenzahl auf Biomasse
+--- niedriger P: Negativer Einfluss Artenzahl auf Biomasse
+
+
+-- biom ~ Artenzahl | K:
+--- Hohes K: Leicht Positiver Einfluss Artenzahl auf Biomasse
+--- niedriges K: Stark Negativer Einfluss (ähnlich oben, s. P)
+
+-- biom ~ P | pH: hohe P gehen mit niedrigem pH einher
+--- hoher pH: pos. Einfluss von P
+--- niedriger pH: neg. Einfluss von P 
+---- Erklärbar durch Wechselwirkung oder auch starker linearer Korrelation von einem der beiden
+---- zur Zielgröße
+
+-- biom ~ K | pH
+--- hoher pH: leicht pos.
+--- nidriger pH: stark negativ
+
+-- biom ~ P | N
+
+-- biom ~ Artenzahl | N
+
+-- biom ~ P | Cges
+
+-- biom ~ pH | Cges
+
+-- biom ~ Artenzahl | Cges
+-- biom ~ P | Corg
+-- biom ~ pH | Corg
+-- biom ~ Artenzahl | Corg
+-- biom ~ K | CorgN
+-- biom ~ pH | CorgN
+obviously corgn und (Cs und N)
+
+! p against artenzahl
+! corg against pH
+! K against P
+! K against Artenzahl
+! N against Artenzahl
+! pH against P
+! pH against K
+! N against P
+! N against pH
+! Cges against P
+! Corg against P

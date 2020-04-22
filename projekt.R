@@ -98,11 +98,11 @@ abline(model_saale_Corg.N, col = "darkgreen")
 
 # biomasse ~ Cges
 plot(biom~Cges, data = data.Saaletal, col = "darkgreen", pch=16)
-abline(model_Saale_Cges, col = "darkgreen")
+abline(model_saale_Cges, col = "darkgreen")
 
 # biomasse ~ P
 plot(biom~P, data = data.Saaletal, col = "darkgreen", pch=16)
-abline(model_Saale_P, col = "darkgreen")
+abline(model_saale_P, col = "darkgreen")
 
 
 # Combined Plots ----------------------------------------------------------
@@ -300,7 +300,7 @@ cor_all_Corg.N <- cor(data.all$biom, data.all$Corg.N)
 # Korrelationskoeffizienten: Variablen untereinander verglichen, in Matrixschreibweise
 vec <- c('P','K','pH', 'N', 'Cges', 'Corg', 'Corg.N', 'Artenzahl', 'biom')
 cor(data.Ilmtal[,vec])
-### Ilmtal (Alle Variablen über Threshold von 0.3 einbezogen)
+# Max-Model durch visuelles...angucken 
 own_model_Ilm <- lm(biom~1+N+Corg+Cges+Corg.N:pH+(P+K+N):Artenzahl+N:P, data = data.Ilmtal)
 
 # Best Model mit Mallows Cp
@@ -310,7 +310,7 @@ summary(ilm_bss)$cp
 index <- which.min(summary(ilm_bss)$cp)
 summary(ilm_bss)$which[index,]
 Cp_Ilm <- lm(biom~1+Cges+Corg.N:pH, data = data.Ilmtal)
-
+summary(Cp_Ilm)
 
 # Model Selection Saaletal ------------------------------------------------
 # old: Artenzahl+N+Corg+Cges+(Corg.N)+P+pH
@@ -319,16 +319,18 @@ Cp_Ilm <- lm(biom~1+Cges+Corg.N:pH, data = data.Ilmtal)
 # Korrelationskoeffizienten: Variablen untereinander verglichen, in Matrixschreibweise
 vec <- c('P','K','pH', 'N', 'Cges', 'Corg', 'Corg.N', 'Artenzahl', 'biom')
 cor(data.Saaletal[,vec])
-own_model_Saale <- lm(biom~1+N+Corg+Artenzahl+Corg.N+P+N:Artenzahl+Corg:P+P:N+P:K, data = data.Saaletal)
+own_model_Saale <- lm(biom~1+P+pH+Cges+Corg.N+Corg+Artenzahl+P:K+P:N+N:Artenzahl+Corg:P, data = data.Saaletal)
 summary(own_model_Saale)
 #plot(own_model_Saale, which=1)
 
 # Best Model mit Mallows Cp
-saale_bss <- regsubsets(biom~1+N+Corg+Artenzahl+Corg.N+pH+P+Artenzahl:N+Corg:P+P:N+P:K, data = data.Saaletal, nbest=1)
+#saale_bss <- regsubsets(biom~1+Corg+N+Cges+Artenzahl+pH+P+Artenzahl:N+Corg:P+P:N+P:K, data = data.Saaletal, nbest=1)
+# K & N rausgeschmissen, da geringster Korrelationskoeffizient; einige interessante Wechselwirkungen reingenommen
+saale_bss <- regsubsets(biom~1+P+pH+Cges+Corg.N+Corg+Artenzahl+P:K+P:N+N:Artenzahl+Corg:P, data = data.Saaletal)
 summary(saale_bss)$cp
 index <- which.min(summary(saale_bss)$cp)
 summary(saale_bss)$which[index,]
-Cp_Saale <- lm(biom~1+Artenzahl+P:K, data = data.Saaletal)
+Cp_Saale <- lm(biom~1+P:N+pH+Cges+Corg+Corg.N, data = data.Saaletal)
 summary(Cp_Saale)
 
 # Standardize Regression-coefficients
