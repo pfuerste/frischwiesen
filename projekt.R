@@ -400,15 +400,15 @@ summary(maxmodel)
 
 
 true_list <- c('Corg','Cges','GebietIlmtal:Corg.N', 'GebietSaaletal:Corg.N', 'GebietIlmtal:P', 'GebietSaaletal:P')
-n <- c(50, 100, 500, 1000)
+n <- c(25, 50, 100, 250, 500, 1000, 3000, 6000)
 model_selection_matrix <- data.frame(matrix(0, ncol = 16, nrow = length(n)))
-rownames(model_selection_matrix) <- c(50, 100, 500, 1000)
+rownames(model_selection_matrix) <- n
 colnames(model_selection_matrix) <- c('N', 'Corg', 'Cges', 'pH', 'Artenzahl', 'GebietSaaletal',
                                       'N:GebietSaaletal', 'Corg:GebietSaaletal', 'Cges:GebietSaaletal', 'pH:GebietSaaletal', 'Artenzahl:GebietSaaletal',
                                       'GebietIlmtal:P', 'GebietSaaletal:P', 'GebietIlmtal:Corg.N', 'GebietSaaletal:Corg.N', 'true_model_included')
 model_size_matrix <- data.frame(matrix(0, ncol = 15, nrow = length(n)))
-rownames(model_size_matrix) <- c(50, 100, 500, 1000)
-colnames(model_size_matrix) <- seq(1, 16, 1)  
+rownames(model_size_matrix) <- n
+colnames(model_size_matrix) <- seq(1, 15, 1)
 
 row.index <- 1
 for(i in n) {
