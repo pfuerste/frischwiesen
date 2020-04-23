@@ -334,8 +334,8 @@ Cp_Saale <- lm(biom~1+P:N+pH+Cges+Corg+Corg.N, data = data.Saaletal)
 summary(Cp_Saale)
 
 # Standardize Regression-coefficients
-library("QuantPsyc")
-lm.beta(own_model_Saale)
+#library("QuantPsyc")
+#lm.beta(own_model_Saale)
 
 
 # Task 3 ------------------------------------------------------------------
@@ -406,6 +406,9 @@ rownames(model_selection_matrix) <- c(50, 100, 500, 1000)
 colnames(model_selection_matrix) <- c('N', 'Corg', 'Cges', 'pH', 'Artenzahl', 'GebietSaaletal',
                                       'N:GebietSaaletal', 'Corg:GebietSaaletal', 'Cges:GebietSaaletal', 'pH:GebietSaaletal', 'Artenzahl:GebietSaaletal',
                                       'GebietIlmtal:P', 'GebietSaaletal:P', 'GebietIlmtal:Corg.N', 'GebietSaaletal:Corg.N', 'true_model_included')
+model_size_matrix <- data.frame(matrix(0, ncol = 15, nrow = length(n)))
+rownames(model_size_matrix) <- c(50, 100, 500, 1000)
+colnames(model_size_matrix) <- seq(1, 16, 1)  
 
 row.index <- 1
 for(i in n) {
@@ -419,15 +422,19 @@ for(i in n) {
     index <- which.min(summary(minCp)$cp)
     summary(minCp)$which[index,]
     # if all predictor-variables of the true model are true, then increas model_count by 1
-    bool <- isTRUE(c(summary(minCp)$which[index,])[true_list])
+    c(summary(minCp)$which[index,])
+    bool <- all(c(summary(minCp)$which[index,])[true_list])
     if(bool == TRUE) {
       model_count <- model_count + 1
     }
     bool_model = rbind(bool_model, c(summary(minCp)$which[index,]))
-    #model_selection_matrix[row.index, index] = model_selection_matrix[row.index, index] + 1
+    model_size_matrix[row.index, index] <-  model_size_matrix[row.index, index] + 1
   }
   model_selection_matrix[row.index,1:15] <- colSums(bool_model[,-1])
   model_selection_matrix$true_model_included[row.index] <- model_count
-  row.index <-  row.index+1
+  row.index <- row.index+1
 }
 
+# Save Table --------------------------------------------------------------
+write.csv(model_selection_matrix, file = "model_selection_matrix.csv", row.names=TRUE)
+write.csv(model_size_matrix, file = "model_size_matrix.csv", row.names=TRUE)
