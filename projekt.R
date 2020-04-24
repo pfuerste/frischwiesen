@@ -1,6 +1,18 @@
+#######################################################################
+### Title:    R-Code Statistishe Verfahren - Projekt 1 Frischwiesen ###
+### Authors:  Max Tiessen, Philip Fuerste, Georg Reinhardt          ###
+### Date:     24/04/2020                                            ###
+#######################################################################
+
 ################
 # Datenset laden
 ################
+
+# Importiere Packages
+# Dependencies ------------------------------------------------------------
+library("leaps")
+
+
 # Load --------------------------------------------------------------------
 set.seed(22)
 data.all <- read.csv("frischwiesen.csv", sep = ";")
@@ -206,27 +218,31 @@ legend(18,200, legend=c("Ilmtal","Saaletal"), fill = c("red", "darkgreen"), bord
 
 
 # Task 2 ------------------------------------------------------------------
-####################################################
+###################################################################
 # 2. Analysieren Sie dann beide Teildatensaetze gemeinsam
 # und untersuchen Sie insbesondere das Vorliegen von 
 # Wechselwirkungen, d.h. unterschiedliche quantitative 
 # Effekte der Einflussgroessen in den beiden Untersuchungsgebieten.
-####################################################
+###################################################################
+
+# Funktion generiert plots, in denen eine Einflussgroesse dichotomisiert wird, 
+# um Interaktion mit einer anderen Einflussgroesse zu visualisieren
 interactions <- function(area, name) {
   column_names <- c('P','K','pH', 'N', 'Cges', 'Corg', 'Corg.N', 'Artenzahl')
   for(i in column_names) {
-    area.sorted <- area[order(area[[i]]),]  #sort
+    area.sorted <- area[order(area[[i]]),]  #sortieren der jeweiligen Spalte
     for(j in column_names) {
       if(i != j) {
-        area.first <- area.sorted[1:ceiling(nrow(area)/2),]
+        area.first <- area.sorted[1:ceiling(nrow(area)/2),] #dichotomisieren der Variable
         area.second <- area.sorted[(ceiling((nrow(area)/2))+1):nrow(area),]
         
-        xlow <- min(area[[j]])
+        xlow <- min(area[[j]]) #X-Achsenabschnitt Grenzen
         xhigh <- max(area[[j]])
+        #lineares Modell zusammenfügen
         lmformula <- as.formula(paste("biom~1+",j, sep=""))
         plottitle <- paste(name,": ", i, " against ",j, sep="")
         subtitle <- paste("red = high values, green = low values")
-        
+        # visualisieren
         model_first <- lm(lmformula, data = area.first)
         model_second <- lm(lmformula, data = area.second)
         plot(lmformula, data = area.first, 
@@ -249,6 +265,7 @@ interactions <- function(area, name) {
   }
 } #end function
 
+# Funktion für jeweiligen Gebiets- und Gesamtdatensatz aufrufen
 interactions(data.Ilmtal, 'Ilmtal')
 interactions(data.Saaletal, 'Saaletal')
 interactions(data.all, 'Gesamt')
@@ -256,39 +273,12 @@ interactions(data.all, 'Gesamt')
 
 # Correlation Coefficient -------------------------------------------------------
 ####################################################
-# Korrelationskoeffizienten der einfachen Variablen 
+# Korrelationskoeffizienten: Variablen 
+# untereinander verglichen, in Matrixschreibweise
 #################################################### 
-cor_saale_N <- cor(data.Saaletal$biom, data.Saaletal$N)
-cor_ilm_N <- cor(data.Ilmtal$biom, data.Ilmtal$N)
-cor_all_N <- cor(data.all$biom, data.all$N)
-
-cor_saale_Corg <- cor(data.Saaletal$biom, data.Saaletal$Corg)
-cor_ilm_Corg <- cor(data.Ilmtal$biom, data.Ilmtal$Corg)
-cor_all_Corg <- cor(data.all$biom, data.all$Corg)
-
-cor_saale_Artenzahl <- cor(data.Saaletal$biom, data.Saaletal$Artenzahl)
-cor_ilm_Artenzahl <- cor(data.Ilmtal$biom, data.Ilmtal$Artenzahl)
-cor_all_Artenzahl <- cor(data.all$biom, data.all$Artenzahl)
-
-cor_saale_pH <- cor(data.Saaletal$biom, data.Saaletal$pH)
-cor_ilm_pH <- cor(data.Ilmtal$biom, data.Ilmtal$pH)
-cor_all_pH <- cor(data.all$biom, data.all$pH)
-
-cor_saale_K <- cor(data.Saaletal$biom, data.Saaletal$K)
-cor_ilm_K <- cor(data.Ilmtal$biom, data.Ilmtal$K)
-cor_all_K <- cor(data.all$biom, data.all$K)
-
-cor_saale_P <- cor(data.Saaletal$biom, data.Saaletal$P)
-cor_ilm_P <- cor(data.Ilmtal$biom, data.Ilmtal$P)
-cor_all_P <- cor(data.all$biom, data.all$P)
-
-cor_saale_Cges <- cor(data.Saaletal$biom, data.Saaletal$Cges)
-cor_ilm_Cges <- cor(data.Ilmtal$biom, data.Ilmtal$Cges)
-cor_all_Cges <- cor(data.all$biom, data.all$Cges)
-
-cor_saale_Corg.N <- cor(data.Saaletal$biom, data.Saaletal$Corg.N)
-cor_ilm_Corg.N <- cor(data.Ilmtal$biom, data.Ilmtal$Corg.N)
-cor_all_Corg.N <- cor(data.all$biom, data.all$Corg.N)
+vec <- c('P','K','pH', 'N', 'Cges', 'Corg', 'Corg.N', 'Artenzahl', 'biom')
+cor(data.Ilmtal[,vec]) # Ilmtal
+cor(data.Saaletal[,vec]) # Saaletal
 
 
 ###################################################
@@ -297,10 +287,7 @@ cor_all_Corg.N <- cor(data.all$biom, data.all$Corg.N)
 ###################################################
 
 # Model Selection Ilmtal --------------------------------------------------
-# Korrelationskoeffizienten: Variablen untereinander verglichen, in Matrixschreibweise
-vec <- c('P','K','pH', 'N', 'Cges', 'Corg', 'Corg.N', 'Artenzahl', 'biom')
-cor(data.Ilmtal[,vec])
-# Max-Model durch visuelles...angucken 
+# Wähle Max-Modell anhand der vorausgegangenen visuellen Inspektion der Daten
 own_model_Ilm <- lm(biom~1+N+Corg+Cges+Corg.N:pH+(P+K+N):Artenzahl+N:P, data = data.Ilmtal)
 
 # Best Model mit Mallows Cp
@@ -313,24 +300,17 @@ Cp_Ilm <- lm(biom~1+Cges+Corg.N:pH, data = data.Ilmtal)
 summary(Cp_Ilm)
 
 # Model Selection Saaletal ------------------------------------------------
-# old: Artenzahl+N+Corg+Cges+(Corg.N)+P+pH
-# new: N+Corg+Artenzahl+Corg.N+pH+P+Artenzahl:N+Corg:P+P:N+P:K
-# new new: N+Corg+Artenzahl+Corg.N+P+K+N:Artenzahl+Corg:P+P:N+P:K
-# Korrelationskoeffizienten: Variablen untereinander verglichen, in Matrixschreibweise
-vec <- c('P','K','pH', 'N', 'Cges', 'Corg', 'Corg.N', 'Artenzahl', 'biom')
-cor(data.Saaletal[,vec])
 own_model_Saale <- lm(biom~1+P+pH+Cges+Corg.N+Corg+Artenzahl+P:K+P:N+N:Artenzahl+Corg:P, data = data.Saaletal)
 summary(own_model_Saale)
 #plot(own_model_Saale, which=1)
 
 # Best Model mit Mallows Cp
-#saale_bss <- regsubsets(biom~1+Corg+N+Cges+Artenzahl+pH+P+Artenzahl:N+Corg:P+P:N+P:K, data = data.Saaletal, nbest=1)
 # K & N rausgeschmissen, da geringster Korrelationskoeffizient; einige interessante Wechselwirkungen reingenommen
 saale_bss <- regsubsets(biom~1+P+pH+Cges+Corg.N+Corg+Artenzahl+P:K+P:N+N:Artenzahl+Corg:P, data = data.Saaletal)
 summary(saale_bss)$cp
 index <- which.min(summary(saale_bss)$cp)
 summary(saale_bss)$which[index,]
-Cp_Saale <- lm(biom~1+P:N+pH+Cges+Corg+Corg.N, data = data.Saaletal)
+Cp_Saale <- lm(biom~1+pH+Cges+Corg+Corg.N+P:N, data = data.Saaletal)
 summary(Cp_Saale)
 
 # Standardize Regression-coefficients
@@ -348,26 +328,24 @@ summary(Cp_Saale)
 
 
 # Model selection Gesamtdatensatz -----------------------------------------
-# Best Model mit Mallows Cp (Gesamter Datensatz)
-#all_bss <- regsubsets(biom~(N+Corg+Cges+Corg.N+pH+Artenzahl+P+K)*as.factor(Gebiet), data = data.all, nbest = 3)
-all_bss <- regsubsets(biom~(N+Corg+Cges+pH+Artenzahl)*as.factor(Gebiet)+P:as.factor(Gebiet)+Corg.N:as.factor(Gebiet), data = data.all, nbest = 3)
-
+# Faktorisieren der Einflussgroesse Gebiet
 data.all$Gebiet <- as.factor(data.all$Gebiet)
 str(data.all)
+
+# Best Model mit Mallows Cp (Gesamter Datensatz)
+# Visuelle Inspektion um Maximalmodell zu erstellen
+all_bss <- regsubsets(biom~1+(N+Corg+Cges+pH+Artenzahl)*Gebiet+P:Gebiet+Corg.N:Gebiet, data = data.all)
 summary(all_bss)$cp
 index <- which.min(summary(all_bss)$cp)
 summary(all_bss)$which[index,]
-Cp_all <- lm(biom~1+N+Corg+Cges+Corg.N+as.factor(Gebiet):Corg+as.factor(Gebiet):pH, data = data.all)
-summary(Cp_all)
-# Visuelle Inspektion um MAximalmodell zu erstellen
-Cp_all2 <- lm(biom~1+Cges+P:Gebiet+Corg.N:Gebiet+Corg, data=data.all)
+Cp_all2 <- lm(biom~1+Cges+P:Gebiet+Corg.N:Gebiet+pH:Gebiet, data=data.all)
 summary(Cp_all2)
 
 
 # SPSE-Saale --------------------------------------------------------------------
 max_model_Saale <- lm(biom~1+P:N+pH+Cges+Corg+Corg.N, data = data.Saaletal)
 max_RSS_Saale <- sum((data.Saaletal$biom - predict(max_model_Saale, newdata = data.Saaletal))^2)
-length = dim(data.Saaletal)[1]            # data entries
+length = dim(data.Saaletal)[1]  # data entries
 sigma2.max_Saale <- max_RSS_Saale/(length - length(coef(max_model_Saale)))  # max.Modell / #entries - #predictor_variables
 
 # SPSE-Gesamt -------------------------------------------------------------
@@ -379,8 +357,9 @@ sigma2.max_Gesamt <- max_RSS_Gesamt/(length - length(coef(max_model_Gesamt)))  #
 
 saale_SPSE <- max_RSS_Saale + 2*sigma2.max_Saale*length(coef(max_model_Saale))
 all_SPSE <- max_RSS_Gesamt + 2*sigma2.max_Gesamt*length(coef(max_model_Gesamt))
+cat("SPSE-Saale: ", saale_SPSE, "\nSPSE-Gesamt: ", all_SPSE)
 # Saale-Modell ist besser (SPSE kleiner) zur Vorhersage des Saaletals; 
-# Ilmtaldaten bringt keine zus?tzlichen Vorteile zur Vorhersage des Saaletals (keine Testdaten vorhanden)
+# Intuition: Ilmtal-Daten bringen keine zusaetzlichen Vorteile zur Vorhersage des Saaletals (keine Testdaten vorhanden)
 
 
 # SIMULATION --------------------------------------------------------------
@@ -391,21 +370,24 @@ all_SPSE <- max_RSS_Gesamt + 2*sigma2.max_Gesamt*length(coef(max_model_Gesamt))
 # Pseudo-Beobachtungen der Zielgröße und führen Sie für die so simulierten
 # Pseudo-Datensätze die Modellwahl mit Hilfe von Mallow’s Cp-Kriterium durch.
 ############################################################################
+#Maximales Modell des Gesamtdatensatzes
 maxformula <- as.formula(paste("biom~1+(N+Corg+Cges+pH+Artenzahl)*Gebiet+P:Gebiet+Corg.N:Gebiet", sep=""))
-lmformula <- as.formula(paste("biom~1+Corg+Cges+Corg.N:Gebiet+P:Gebiet", sep=""))
+# Best-Model basierend auf Mallow's Cp, welches unser "wahres Modell" stellt
+lmformula <- as.formula(paste("biom~1+Cges+P:Gebiet+Corg.N:Gebiet+pH:Gebiet", sep=""))
 true_model <- lm(lmformula, data = data.all)
-maxmodel <- lm(maxformula, data = data.all)
-summary(maxmodel)
 
 
-
-true_list <- c('Corg','Cges','GebietIlmtal:Corg.N', 'GebietSaaletal:Corg.N', 'GebietIlmtal:P', 'GebietSaaletal:P')
+# Liste der Variablen, die im wahren Modell vorkommen
+true_list <- c('Cges','GebietIlmtal:Corg.N', 'GebietSaaletal:Corg.N', 'GebietIlmtal:P', 'GebietSaaletal:P', 'pH:GebietSaaletal')
+# Liste der verschiedenen Pseudo-Datensatz-Groessen
 n <- c(25, 50, 100, 250, 500, 1000, 3000, 6000)
+# Erstelle data-frame zum speichern der Haeufigkeiten, mit der die (richtigen) Praediktoren ausgewählt werden
 model_selection_matrix <- data.frame(matrix(0, ncol = 16, nrow = length(n)))
 rownames(model_selection_matrix) <- n
 colnames(model_selection_matrix) <- c('N', 'Corg', 'Cges', 'pH', 'Artenzahl', 'GebietSaaletal',
                                       'N:GebietSaaletal', 'Corg:GebietSaaletal', 'Cges:GebietSaaletal', 'pH:GebietSaaletal', 'Artenzahl:GebietSaaletal',
                                       'GebietIlmtal:P', 'GebietSaaletal:P', 'GebietIlmtal:Corg.N', 'GebietSaaletal:Corg.N', 'true_model_included')
+# Erstelle data-frame zum speichern der Anzahl der ausgewaehlten Praediktoren (pro 1000 Simulationen)
 model_size_matrix <- data.frame(matrix(0, ncol = 15, nrow = length(n)))
 rownames(model_size_matrix) <- n
 colnames(model_size_matrix) <- seq(1, 15, 1)
@@ -415,22 +397,25 @@ for(i in n) {
   bool_model = c()
   model_count <- 0
   for(j in 1:1000) {
-    data.prediction <- data.all[sample(1:dim(data.all)[1],i,replace=TRUE),]
+    data.prediction <- data.all[sample(1:dim(data.all)[1],i,replace=TRUE),] #ziehe random sample aus Datensatz
+    # Simuliere die Zielgroesse basierend auf dem "wahren Modell" plus einem normalverteilten Versatz
     data.prediction$biom <- predict(true_model, newdata = data.prediction) + rnorm(i, mean = 0, sd = sd(data.all$biom))
 
     minCp <- regsubsets(maxformula, data = data.prediction)
     index <- which.min(summary(minCp)$cp)
     summary(minCp)$which[index,]
-    # if all predictor-variables of the true model are true, then increas model_count by 1
-    c(summary(minCp)$which[index,])
+    # Wenn alle Praediktor-Variablen, die im wahren Modell vorkommen = true sind,
+    # dann erhöhe den Zaehler (model_count) um 1
     bool <- all(c(summary(minCp)$which[index,])[true_list])
     if(bool == TRUE) {
       model_count <- model_count + 1
     }
+    #Speichere die Variablen jedes Modells in einer Bool-Matrix (enthalten, nicht enthalten)
     bool_model = rbind(bool_model, c(summary(minCp)$which[index,]))
+    #Fuer jedes Vorkommen einer gewissen Anzahl an Praediktor-Variablen im Modell, addiere 1
     model_size_matrix[row.index, index] <-  model_size_matrix[row.index, index] + 1
   }
-  model_selection_matrix[row.index,1:15] <- colSums(bool_model[,-1])
+  model_selection_matrix[row.index,1:15] <- colSums(bool_model[,-1]) #summiere das Vorkommen der Praediktoren auf
   model_selection_matrix$true_model_included[row.index] <- model_count
   row.index <- row.index+1
 }
