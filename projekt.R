@@ -1,7 +1,7 @@
 #######################################################################
 ### Title:    R-Code Statistishe Verfahren - Projekt 1 Frischwiesen ###
 ### Authors:  Max Tiessen, Philip Fuerste, Georg Reinhardt          ###
-### Date:     24/04/2020                                            ###
+### Date:     28/04/2020                                            ###
 #######################################################################
 
 ################
@@ -357,7 +357,7 @@ sigma2.max_Gesamt <- max_RSS_Gesamt/(length - length(coef(max_model_Gesamt)))  #
 
 saale_SPSE <- max_RSS_Saale + 2*sigma2.max_Saale*length(coef(max_model_Saale))
 all_SPSE <- max_RSS_Gesamt + 2*sigma2.max_Gesamt*length(coef(max_model_Gesamt))
-cat("SPSE-Saale: ", saale_SPSE, "\nSPSE-Gesamt: ", all_SPSE)
+cat("SPSE-Saale: ", saale_SPSE, "\nSPSE-Gesamt: ", all_SPSE, "\n")
 # Saale-Modell ist besser (SPSE kleiner) zur Vorhersage des Saaletals; 
 # Intuition: Ilmtal-Daten bringen keine zusaetzlichen Vorteile zur Vorhersage des Saaletals (keine Testdaten vorhanden)
 
@@ -372,6 +372,8 @@ cat("SPSE-Saale: ", saale_SPSE, "\nSPSE-Gesamt: ", all_SPSE)
 ############################################################################
 #Maximales Modell des Gesamtdatensatzes
 maxformula <- as.formula(paste("biom~1+(N+Corg+Cges+pH+Artenzahl)*Gebiet+P:Gebiet+Corg.N:Gebiet", sep=""))
+#maxformula <- lm(maxformula, data=data.all)
+
 # Best-Model basierend auf Mallow's Cp, welches unser "wahres Modell" stellt
 lmformula <- as.formula(paste("biom~1+Cges+P:Gebiet+Corg.N:Gebiet+pH:Gebiet", sep=""))
 true_model <- lm(lmformula, data = data.all)
@@ -415,7 +417,7 @@ for(i in n) {
     #Fuer jedes Vorkommen einer gewissen Anzahl an Praediktor-Variablen im Modell, addiere 1
     model_size_matrix[row.index, index] <-  model_size_matrix[row.index, index] + 1
   }
-  model_selection_matrix[row.index,1:15] <- colSums(bool_model[,-1]) #summiere das Vorkommen der Praediktoren auf
+  model_selection_matrix[row.index,1:15] <- colSums(bool_model[,-1]) #summiere das Vorkommen der Praediktoren
   model_selection_matrix$true_model_included[row.index] <- model_count
   row.index <- row.index+1
 }
