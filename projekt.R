@@ -355,7 +355,7 @@ length = dim(data.all)[1]            # data entries
 sigma2.max_Gesamt <- max_RSS_Gesamt/(length - length(coef(max_model_Gesamt)))  # max.Modell / #entries - #predictor_variables
 
 
-saale_SPSE <- max_RSS_Saale + 2*sigma2.max_Saale*length(coef(max_model_Saale))
+saale_SPSE <- max_RSS_Saale + 2*sigma2.max_Gesamt*length(coef(max_model_Saale))
 all_SPSE <- max_RSS_Gesamt + 2*sigma2.max_Gesamt*length(coef(max_model_Gesamt))
 cat("SPSE-Saale: ", saale_SPSE, "\nSPSE-Gesamt: ", all_SPSE, "\n")
 # Saale-Modell ist besser (SPSE kleiner) zur Vorhersage des Saaletals; 
