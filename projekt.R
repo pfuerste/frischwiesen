@@ -343,20 +343,21 @@ summary(Cp_all2)
 
 
 # SPSE-Saale --------------------------------------------------------------------
-max_model_Saale <- lm(biom~1+P:N+pH+Cges+Corg+Corg.N, data = data.Saaletal)
-max_RSS_Saale <- sum((data.Saaletal$biom - predict(max_model_Saale, newdata = data.Saaletal))^2)
+true_model_Saale <- lm(biom~1+P:N+pH+Cges+Corg+Corg.N, data = data.Saaletal)
+RSS_Saale <- sum((data.Saaletal$biom - predict(true_model_Saale, newdata = data.Saaletal))^2)
 length = dim(data.Saaletal)[1]  # data entries
-sigma2.max_Saale <- max_RSS_Saale/(length - length(coef(max_model_Saale)))  # max.Modell / #entries - #predictor_variables
+#RSS unterschätzt Prognosefehler, deshalb:
+sigma2.true_Saale <- RSS_Saale/(length - length(coef(true_model_Saale)))  # max.Modell / #entries - #predictor_variables
 
 # SPSE-Gesamt -------------------------------------------------------------
-max_model_Gesamt <- lm(biom~1+Cges+P:Gebiet+Corg.N:Gebiet+pH:Gebiet, data=data.all)
-max_RSS_Gesamt <- sum((data.Saaletal$biom - predict(max_model_Gesamt, newdata = data.Saaletal))^2)
+true_model_Gesamt <- lm(biom~1+Cges+P:Gebiet+Corg.N:Gebiet+pH:Gebiet, data=data.all)
+RSS_Gesamt <- sum((data.Saaletal$biom - predict(true_model_Gesamt, newdata = data.Saaletal))^2)
 length = dim(data.all)[1]            # data entries
-sigma2.max_Gesamt <- max_RSS_Gesamt/(length - length(coef(max_model_Gesamt)))  # max.Modell / #entries - #predictor_variables
+sigma2.true_Gesamt <- RSS_Gesamt/(length - length(coef(true_model_Gesamt)))  # max.Modell / #entries - #predictor_variables
 
 
-saale_SPSE <- max_RSS_Saale + 2*sigma2.max_Gesamt*length(coef(max_model_Saale))
-all_SPSE <- max_RSS_Gesamt + 2*sigma2.max_Gesamt*length(coef(max_model_Gesamt))
+saale_SPSE <- RSS_Saale + 2*sigma2.true_Gesamt*length(coef(true_model_Saale))
+all_SPSE <- RSS_Gesamt + 2*sigma2.true_Gesamt*length(coef(true_model_Gesamt))
 cat("SPSE-Saale: ", saale_SPSE, "\nSPSE-Gesamt: ", all_SPSE, "\n")
 # Saale-Modell ist besser (SPSE kleiner) zur Vorhersage des Saaletals; 
 # Intuition: Ilmtal-Daten bringen keine zusaetzlichen Vorteile zur Vorhersage des Saaletals (keine Testdaten vorhanden)
